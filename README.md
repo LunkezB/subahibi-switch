@@ -1,7 +1,7 @@
 # Чудесные дни — Пунктирная жизнь для Nintendo Switch
 
 Неофициальный порт русской версии **«Чудесных дней»** (Subarashiki Hibi
-~Furenzoku Sonzai~) на Nintendo Switch с кастомной прошивкой (Atmosphère).
+Furenzoku Sonzai) на Nintendo Switch с кастомной прошивкой (Atmosphère).
 
 Порт сделан на основе Android-порта от **VienDesu! Porting Team**,
 доработанного из порта **Innocence translations**, и работает на движке
