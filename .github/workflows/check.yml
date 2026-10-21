@@ -1,0 +1,33 @@
+name: Проверка
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Синтаксис Python
+        run: python -m py_compile build.py patch/assets.py tests/smoke.py
+
+      # Файлы игры в репозиторий не попадают: проверяем типичные форматы
+      # и большие файлы.
+      - name: Нет файлов игры
+        run: |
+          bad=$(git ls-files | grep -i -E '\.(apk|rpa|rpyc|rpymc|rpyb|nsp|nro|nca|ogg|opus|mp3|wav|webm|mp4|ogv|avif|webp|jpg|jpeg)$|(^|/)prod\.keys$' || true)
+          big=$(git ls-files -z | xargs -0 -I{} sh -c 'test $(stat -c %s "{}") -gt 1048576 && echo "{}"' || true)
+          if [ -n "$bad$big" ]; then echo "::error::Похоже на файлы игры или ключи:"; echo "$bad"; echo "$big"; exit 1; fi
+
+      # Сборка тестовой мини-игры из поддельного APK движком из engine.txt:
+      # .nro и .nsp (одноразовые ключи), наложение patch/game.
+      - name: Тестовая сборка
+        run: |
+          pip install -q pillow
+          python tests/smoke.py

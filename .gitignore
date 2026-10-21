@@ -1,0 +1,22 @@
+# Результаты сборки и скачанный движок
+out/
+engine/
+
+# Файлы игры и ключи: в репозиторий не попадают никогда
+*.apk
+*.nsp
+*.nro
+*.nca
+*.rpa
+*.rpyc
+*.rpymc
+*.rpyb
+prod.keys
+title.keys
+keys.txt
+keys.dat
+*.keys
+
+# Python
+__pycache__/
+*.pyc
