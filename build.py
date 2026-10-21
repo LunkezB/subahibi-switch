@@ -33,7 +33,8 @@ import urllib.request
 GAME_NAME = "subahibi"                  # папка на SD-карте; из неё же title id NSP
 TITLE = "Чудесные дни"                  # название на главном экране / в Homebrew Menu
 AUTHOR = "Innocence translations, VienDesu!"   # издатель в меню
-PORT_REVISION = "1"                     # версия Switch-порта: «<версия APK>-sw<это>»
+PORT_REVISION = "2"                     # версия Switch-порта: «<версия APK>-sw<это>»
+PREPARE_VERSION = 2                     # вид распаковки (см. prepare_game)
 ENGINE_REPO = "LunkezB/RenpySwitch"
 
 # ---------------------------------------------------------------------------
@@ -210,7 +211,12 @@ def prepare_game(args, a2s, engine_dir, out_dir, game_dir, apk_path):
     except (OSError, ValueError):
         state = {}
 
+    # Картинки игры — AVIF в файлах .webp: Switch их не декодирует, поэтому
+    # при распаковке они переводятся в WebP (--convert-avif). "prepare" в
+    # build-state.json: распаковки старого вида делаются заново.
     source = file_id(apk_path) if apk_path else [os.path.abspath(args.game)]
+    if state.get("prepare") != PREPARE_VERSION:
+        state["source"] = None
     if args.clean or state.get("source") != source or not os.path.isdir(game_dir):
         for d in (game_dir, backup_dir):
             if os.path.isdir(d):
@@ -218,7 +224,8 @@ def prepare_game(args, a2s, engine_dir, out_dir, game_dir, apk_path):
         state = {}
         if apk_path:
             say("Распаковываю игру из APK ...")
-            run_apk2switch(engine_dir, apk_path, "-o", out_dir, "--name", GAME_NAME, "--pack", "--force")
+            run_apk2switch(engine_dir, apk_path, "-o", out_dir, "--name", GAME_NAME, "--pack", "--force",
+                           "--convert-avif")
         else:
             say("Копирую игру из {} ...".format(args.game))
             shutil.copytree(args.game, game_dir)
@@ -226,8 +233,9 @@ def prepare_game(args, a2s, engine_dir, out_dir, game_dir, apk_path):
             loose = [os.path.relpath(os.path.join(r, f), game_dir).replace(os.sep, "/")
                      for r, _d, fs in os.walk(game_dir) for f in fs]
             if not packed and any(not a2s.keep_loose(rel) for rel in loose):
-                run_apk2switch(engine_dir, game_dir, "--pack")
+                run_apk2switch(engine_dir, game_dir, "--pack", "--convert-avif")
         state["source"] = source
+        state["prepare"] = PREPARE_VERSION
     else:
         say("Игра уже распакована, накладываю изменения заново.")
 
@@ -364,9 +372,12 @@ def main():
         fail("--game указывает внутрь папки результата ({}); укажите исходную папку игры.".format(args.out))
 
     try:
-        import PIL  # noqa: F401
+        from PIL import features
     except ImportError:
-        fail("нужна библиотека Pillow (иконка, картинки): pip install pillow")
+        fail("нужна библиотека Pillow (иконка, картинки): pip install --upgrade pillow")
+    if not features.check("avif"):
+        fail("нужна Pillow 11.2 или новее с поддержкой AVIF (картинки игры — AVIF):\n"
+             "  pip install --upgrade pillow")
 
     apk_path = None if args.game else find_apk(args)
     keys = find_keys(args.keys) if args.nsp else None

@@ -32,7 +32,8 @@ Ren'Py 8.5.3 для Switch ([RenpySwitch](https://github.com/LunkezB/RenpySwitch
 * Switch с Atmosphère. Для NSP — ещё **sigpatches** (если вы уже ставите
   NSP через DBI или Tinfoil, они у вас, скорее всего, есть).
 * ПК с Windows, Linux или macOS, [Python](https://www.python.org/downloads/)
-  3.8 или новее и библиотека Pillow: `pip install pillow`.
+  3.8 или новее и библиотека Pillow 11.2 или новее (с AVIF):
+  `pip install --upgrade pillow`.
 * APK Android-порта от VienDesu! Porting Team.
 * Для NSP: `prod.keys` **своей** консоли (их сдампливает Lockpick_RCM, файл
   появится в `sdmc:/switch/prod.keys`). Ключи нужны только на вашем ПК для
@@ -50,15 +51,17 @@ Ren'Py 8.5.3 для Switch ([RenpySwitch](https://github.com/LunkezB/RenpySwitch
    python build.py --nsp    .nro и .nsp
    ```
 
-Первая сборка скачивает движок (около 75 МБ) и распаковывает игру — это
-займёт несколько минут; повторные сборки быстрее. Свободного места на диске
+Первая сборка скачивает движок (около 75 МБ), распаковывает игру и
+переводит её картинки из AVIF в WebP (Switch не умеет AVIF) — это займёт
+около получаса; повторные сборки быстрее. Свободного места на диске
 нужно примерно в три раза больше размера игры.
 
 Результат появится в папке `out`.
 
 **Обязательно ли нужен APK?** Лучше собирать из него: из APK берутся игра,
 иконка и версия. Если APK нет, подойдёт уже распакованная папка `game`,
-например с SD-карты после прошлой сборки:
+например с SD-карты после прошлой сборки (версии `-sw2` или новее: в более
+старых картинки не переведены из AVIF):
 `python build.py --game путь\к\switch\subahibi\game --nsp`.
 
 ## Установка
@@ -68,6 +71,12 @@ Ren'Py 8.5.3 для Switch ([RenpySwitch](https://github.com/LunkezB/RenpySwitch
 Установите `out/subahibi.nsp` через DBI, Tinfoil или Goldleaf. Игра
 появится на главном экране с иконкой и запускается как обычная игра — со
 всей памятью консоли. Папка `game` на карте для NSP не нужна.
+
+Если у вас стоит NSP версии `-sw1`, удалите его: у новой версии другой
+title id (`01F7BA5EB448C000`), и старая на эмуляторах не запускалась.
+Сохранения лежат на SD-карте и никуда не денутся.
+
+NSP запускается и на эмуляторе Eden (оконная версия, `eden.exe`).
 
 ### NRO — через Homebrew Menu
 
